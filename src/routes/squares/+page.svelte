@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { Mention } from "@/components/Mention";
   import { credits } from "@/assets/credits";
+
   //   export let data;
 
   //   const { image } = data;
@@ -34,6 +35,10 @@
     }
   });
 </script>
+
+<svelte:head>
+  <title>Squares</title>
+</svelte:head>
 
 <!-- {#await image}
   ...wait
