@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { afterUpdate, onMount, tick } from "svelte";
   import { Mention } from "@/components/Mention";
   import { credits } from "@/assets/credits";
 
-  //   export let data;
+  export let data;
 
-  //   const { image } = data;
+  const { image } = data;
 
   let container: HTMLDivElement;
   let container_block: HTMLDivElement;
@@ -24,15 +24,36 @@
     let blockStyle = `
         width: ${blockWidth}px;
         height: ${blockHeigth}px;
-        background: rgba(43, 15, 15, 0.5);
-        border: 1px solid black;
+        background: #1915ffcb;
+        transition: all 0.5s ease;
         `;
 
     for (let index = 0; index < totalBlocks; index++) {
       let block = document.createElement("div");
       block.style.cssText = blockStyle;
+      block.classList.add("block");
       container_block.appendChild(block);
     }
+  });
+
+  afterUpdate(async () => {
+    const blocks = document.querySelectorAll(".block");
+    const timeOutDuration = 300;
+
+    await tick();
+
+    blocks.forEach((block: Element) => {
+      let timeout: number | undefined;
+      const blockDiv = block as HTMLDivElement;
+      blockDiv.addEventListener("mouseover", () => {
+        clearTimeout(timeout);
+        blockDiv.style.background = "red";
+
+        timeout = setTimeout(() => {
+          blockDiv.style.background = "#1915ffcb";
+        }, timeOutDuration);
+      });
+    });
   });
 </script>
 
@@ -40,21 +61,18 @@
   <title>Squares</title>
 </svelte:head>
 
-<!-- {#await image}
-  ...wait
-{:then image}
-  <img src={image.urls.regular} alt="" />
-{:catch}
-  <p>:p</p>
-{/await} -->
-
 <div class="container_image">
   <div bind:this={container} class="container_image__container">
     <div class="container_image__container_image">
-      <img src="image.jpg" alt="" />
+      {#await image}
+        ...wait
+      {:then image}
+        <img class="container_image__image" src={image.urls.regular} alt="" />
+      {:catch}
+        <p>:p</p>
+      {/await}
     </div>
     <div bind:this={container_block} class="container_image__blocks"></div>
-    <div class="container_image__overalay"></div>
   </div>
   <Mention.MentionText
     >Photo By
@@ -64,7 +82,7 @@
 
 <style>
   :global(*) {
-    @apply m-0 p-0 box-border;
+    @apply m-0 p-0 box-border font-sans uppercase;
   }
 
   .container_image {
@@ -75,11 +93,11 @@
     @apply relative w-[600px] h-[600px] overflow-hidden;
   }
 
-  .container_image__overalay {
-    @apply absolute top-0 w-full h-full mix-blend-multiply bg-grid_block;
+  .container_image__image {
+    @apply w-full h-auto;
   }
 
   .container_image__blocks {
-    @apply absolute top-0 flex w-full h-full overflow-hidden flex-row flex-wrap;
+    @apply absolute top-0 mix-blend-multiply flex w-full h-full overflow-hidden flex-row flex-wrap z-20;
   }
 </style>
